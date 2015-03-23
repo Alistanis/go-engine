@@ -11,10 +11,105 @@ import (
 	"azul3d.org/gfx.v1"
 	"azul3d.org/keyboard.v1"
 	"azul3d.org/lmath.v1"
+	"coopersoft/player/state"
+)
+
+
+var (
+	CurrentState *PlayerState
+	LastState *PlayerState
 )
 
 type Player struct {
 	Card *gfx.Object
+}
+
+func(p *Player) HandleInput(e keyboard.StateEvent) {
+	CurrentState.HandleInput(e)
+}
+
+type PlayerState interface {
+	HandleInput(e keyboard.StateEvent)
+	ExitState(ps *PlayerState)
+}
+
+type PlayerAction struct {
+	Name string
+	Identifier int
+	Function func()
+}
+
+type Direction interface {
+	Direction() lmath.Vec3
+}
+
+type North struct {
+	Vec3 lmath.Vec3
+}
+
+func(n North)Direction() lmath.Vec3 {
+	return Vec3{X: 0, Y: 0, Z: -1}
+}
+
+type NorthEast struct {
+	Vec3 lmath.Vec3
+}
+
+type East struct {
+	Vec3 lmath.Vec3
+}
+
+type SouthEast struct {
+	Vec3 lmath.Vec3
+}
+
+type South struct {
+	Vec3 lmath.Vec3
+}
+
+type SouthWest struct {
+	Vec3 lmath.Vec3
+}
+
+type West struct {
+	Vec3 lmath.Vec3
+}
+
+type NorthWest struct {
+	Vec3 lmath.Vec3
+}
+
+
+type Moving interface {
+	MovePlayer(p *Player, d *Direction)
+}
+
+func(m Moving)HandleInput(e keyboard.StateEvent) {
+	if ev.Key == keyboard.W {
+		fmt.Println(ev)
+		if ev.State == keyboard.Down {
+			moving = true
+		}
+		if ev.State == keyboard.Up {
+			moving = false
+		}
+	}
+}
+
+func(p *PlayerAction) Name() string {
+	return p.Name
+}
+
+func(p *PlayerAction) Identifier() int {
+	return p.Identifier
+}
+
+func(p *PlayerAction) Exec() {
+	Function()
+}
+
+func NewPlayerAction(name string, ident int, f func()) *PlayerAction {
+	return &PlayerAction{Name: name, Identifier: ident, Function: f}
 }
 
 func NewPlayer() *Player {

@@ -6,12 +6,53 @@ import (
 	"encoding/yaml"
 	"io/ioutil"
 	"log"
-	"reflect"
-	"coopersoft/config/actionslist"
+	"coopersoft/player"
 )
 
+const (
+	MoveUp = iota
+	MoveDown 
+	MoveLeft 
+	MoveRight 
+	Pause
+	Quit
+	Attack1 
+	Attack2 
+)
+
+const (
+
+)
+
+var (
+	
+	Actions = [...]*Action { 
+		NewAction("MoveUp", MoveUp), 
+		NewAction("MoveDown", MoveDown), 
+		NewAction("MoveLeft", MoveLeft),
+		NewAction("MoveRight", MoveRight),
+		NewAction("Pause", Pause),
+		NewAction("Quit", Quit),
+		NewAction("Attack1", Attack1),
+		NewAction("Attack2", Attack2),
+		}
+
+	DefaultBindings := map[*Button]*Action{
+		NewKeyButton("MoveUp")
+	}
+	
+	bindingsDir string
+
+
+)
+
+
+func init() {
+	Bindings = make(map[*Button]*Action)
+}
+
 func absPath(relPath string) string {
-	if len(examplesDir) == 0 {
+	if len(bindingsDir) == 0 {
 		// Find assets directory.
 		for _, path := range filepath.SplitList(build.Default.GOPATH) {
 			path = filepath.Join(path, "src/coopersoft/config")
@@ -21,7 +62,7 @@ func absPath(relPath string) string {
 			}
 		}
 	}
-	return filepath.Join(examplesDir, relPath)
+	return filepath.Join(bindingsDir, relPath)
 }
 
 func getBytesFromFile(path string) []byte {
@@ -32,28 +73,35 @@ func getBytesFromFile(path string) []byte {
 	return bytes
 }
 
-type Action struct {
-	Name string
-	Identifier int
-	Duration float64
-}
-
-func NewAction(name string, ident int, duration float64) *Action {
-	return &Action{Name: name, Identifier: ident, Duration: duration}
+type Action interface {
+	Name() string
+	Identifier() int
+	Exec func()
 }
 
 type Button interface {
 	Name() string
+	Action() *Action
 }
 
 type KeyButton struct {
 	Name string
-	Button keyboard.Key
+	Binding keyboard.Key
+	Act *Action
+}
+
+func NewKeyButton(s string, k keyboard.Key) *KeyButton {
+	return &KeyButton{Name: s, Button: k}
 }
 
 type MouseButton struct {
 	Name string
-	Button mouse.Button
+	Binding mouse.Button
+	Act *Action
+}
+
+func NewMouseButton(s string, m mouse.Button) *MouseButton {
+	return &MouseButton{Name: s, Button: m}
 }
 
 func(k *KeyButton) Name() string {
@@ -64,25 +112,12 @@ func(m *MouseButton) Name() string {
 	return m.Name
 }
 
-
-
-var (
-	Bindings map[Action]Button
-
-	MoveUp = NewAction("MoveUp", 0, 0)
-	MoveDown = NewAction("MoveDown": 1, 0)
-	MoveLeft = NewAction("MoveLeft", 2, 0) 
-	MoveRight 
-	Pause
-	Quit
-	Attack1 
-	Attack2 
-)
-
 func ResetDefaultBindings(){
+	for i := range Actions; i < len(Actions); i++ {
 
+	}
 }
 
-func SetBinding(a Action, b Button) {
-	Bindings[a] = b
+func SetBinding(b *Button, a *Action) {
+	Bindings[b] = a
 }
